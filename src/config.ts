@@ -15,4 +15,5 @@ export const SMTP_INFO = {
   host: process.env.SMTP_HOST!,
   user: process.env.SMTP_USER!,
   password: process.env.SMTP_PASSWORD!,
+  port: process.env.SMTP_PORT!,
 };

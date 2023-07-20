@@ -4,7 +4,7 @@ import { Printer } from './printer';
 
 const transporter = createTransport({
   host: SMTP_INFO.host,
-  port: 465,
+  port: SMTP_INFO.port,
   secure: true,
   auth: {
     user: SMTP_INFO.user,
