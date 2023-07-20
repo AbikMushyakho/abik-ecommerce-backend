@@ -19,7 +19,7 @@ export class OTP {
 
   @Column({
     type: 'varchar',
-    length: '6',
+    length: 6,
   })
   code: string;
 
@@ -30,15 +30,17 @@ export class OTP {
   })
   type: OTPType;
 
-  @Column()
-  userId: string;
+  @Column('uuid')
+  user_id: string;
 
-  @ManyToOne(() => User, (user) => user.otps, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'userId' })
+  @ManyToOne(
+    () => User,
+    (user) => user.otps,
+    // {onDelete: 'CASCADE',}
+  )
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 }

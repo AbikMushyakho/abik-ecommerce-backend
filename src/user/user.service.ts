@@ -10,9 +10,10 @@ import { User } from './entities/user.entity';
 // import { InjectRepository } from '@nestjs/typeorm';
 import * as argon from 'argon2';
 import { OtpService } from 'src/otp/otp.service';
-import { OTPType } from 'src/otp/entities/otp.entity';
+import { OTP, OTPType } from 'src/otp/entities/otp.entity';
 import { MailType, getMailTemplates } from 'src/helpers/templates-generator';
 import { sendMail } from 'src/helpers/mail';
+import { generateOTP } from 'src/helpers/utils';
 
 @Injectable()
 export class UserService {
@@ -28,11 +29,23 @@ export class UserService {
     await queryRunner.startTransaction();
     try {
       // check by email
-      const emailExists = this.getUserByEmail(payload.email);
+      const emailExists = await this.dataSource.getRepository(User).findOne({
+        where: {
+          email: payload.email,
+        },
+        select: { email: true },
+      });
       if (emailExists) throw new BadRequestException('User already exists');
 
       // check by username
-      const usernameExists = this.getUserByUsername(payload.username);
+      const usernameExists = await this.dataSource.getRepository(User).findOne({
+        where: {
+          username: payload.username,
+        },
+        select: {
+          username: true,
+        },
+      });
       if (usernameExists) throw new BadRequestException('User already exists');
 
       // password hasing
@@ -43,15 +56,18 @@ export class UserService {
         .save(userDetails);
 
       // send Otp email
-      const otp = await this.otpService.createOtp(
-        savedUser.id,
-        OTPType.emailVerification,
-      );
+
+      const code = await generateOTP(6);
+      await queryRunner.manager
+        .getRepository(OTP)
+        .save({ user_id: savedUser.id, type: OTPType.emailVerification, code });
+
+      // Commiting changes
+      await queryRunner.commitTransaction();
 
       const html = await getMailTemplates(MailType.newRegistrationOtp, {
-        otp: otp.code,
+        otp: code,
       });
-
       sendMail({
         to: savedUser.email,
         subject: 'Email Verification',
@@ -59,7 +75,6 @@ export class UserService {
       });
       // send mail with otp
 
-      await queryRunner.commitTransaction();
       return savedUser;
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -75,7 +90,7 @@ export class UserService {
       select: {
         id: true,
         email: true,
-        fullName: true,
+        full_name: true,
         username: true,
         address: true,
         avatar: true,
@@ -103,21 +118,5 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
-  }
-
-  async getUserByEmail(email: string) {
-    return await this.dataSource.getRepository(User).findOne({
-      where: {
-        email,
-      },
-    });
-  }
-
-  async getUserByUsername(username: string) {
-    return await this.dataSource.getRepository(User).findOne({
-      where: {
-        username,
-      },
-    });
   }
 }
