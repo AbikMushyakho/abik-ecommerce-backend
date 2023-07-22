@@ -8,7 +8,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, verifyOtpDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOperation } from '@nestjs/swagger';
 
@@ -18,8 +18,14 @@ export class UserController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register user' })
-  async register(@Body() createUserDto: CreateUserDto) {
-    return this.userService.register(createUserDto);
+  async register(@Body() payload: CreateUserDto) {
+    return this.userService.register(payload);
+  }
+
+  @Post('verify-otp')
+  @ApiOperation({ summary: 'Verify User' })
+  async verifyOtp(@Body() payload: verifyOtpDto) {
+    return this.userService.verifyOtp(payload.email, payload.otp);
   }
 
   @Get()

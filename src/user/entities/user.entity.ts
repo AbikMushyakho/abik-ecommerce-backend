@@ -44,6 +44,9 @@ export class User {
   @Column({ type: 'text', select: false, nullable: true })
   password: string;
 
+  @Column({ type: 'boolean', default: false })
+  isVerified: boolean;
+
   @OneToMany(() => OTP, (otp) => otp.user)
   otps: OTP[];
 }

@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, verifyOtpDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -13,6 +13,7 @@ import { OTP, OTPType } from 'src/otp/entities/otp.entity';
 import { MailType, getMailTemplates } from 'src/helpers/templates-generator';
 import { sendMail } from 'src/helpers/mail';
 import { generateOTP } from 'src/helpers/utils';
+import { globalResponse } from 'src/helpers/globalResponse';
 
 @Injectable()
 export class UserService {
@@ -61,7 +62,6 @@ export class UserService {
         .save({ user_id: savedUser.id, type: OTPType.emailVerification, code });
 
       // Commiting changes
-      await queryRunner.commitTransaction();
 
       const html = await getMailTemplates(MailType.newRegistrationOtp, {
         otp: code,
@@ -72,8 +72,9 @@ export class UserService {
         html,
       });
       // send mail with otp
+      await queryRunner.commitTransaction();
 
-      return savedUser;
+      return globalResponse(true, 'Registeration Success', savedUser);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -100,6 +101,58 @@ export class UserService {
     if (!user) throw new NotFoundException('User not found');
 
     return user;
+  }
+
+  async verifyOtp(email: string, otp: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const user = await this.dataSource.getRepository(User).findOne({
+        where: {
+          email,
+        },
+        select: {
+          id: true,
+          isVerified: true,
+        },
+      });
+
+      if (!user) throw new NotFoundException('User not found');
+
+      // check user is already verified
+      if (user.isVerified)
+        throw new BadRequestException('User Already verified');
+
+      // Find otp
+      const foundOtp = await this.dataSource.getRepository(OTP).findOne({
+        where: {
+          user_id: user.id,
+          code: otp,
+          type: OTPType.emailVerification,
+        },
+      });
+      if (!foundOtp) throw new NotFoundException('Please register first!!');
+
+      // validate otp
+      // OTP is valid for 15 minutes only
+      const expiryTime = 1000 * 60 * 15;
+      if (foundOtp.created_at.getTime() + expiryTime < Date.now()) {
+        throw new BadRequestException('OTP has expired!');
+      }
+
+      // upadate user to verified
+      user.isVerified = true;
+      await queryRunner.manager.getRepository(User).save(user);
+
+      await queryRunner.commitTransaction();
+      return globalResponse(true, 'OTP veification successful', { email });
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   findAll() {

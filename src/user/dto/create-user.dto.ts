@@ -1,10 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
   IsStrongPassword,
+  MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -37,4 +39,15 @@ export class CreateUserDto {
   @ApiProperty({ example: '+977 9011100001' })
   @IsPhoneNumber()
   readonly phone_number: string;
+}
+
+export class verifyOtpDto {
+  @ApiProperty({ example: 'john@gmail.com' })
+  @IsEmail()
+  readonly email: string;
+
+  @ApiProperty({ example: '000000' })
+  @IsString()
+  @MinLength(6)
+  readonly otp: string;
 }
