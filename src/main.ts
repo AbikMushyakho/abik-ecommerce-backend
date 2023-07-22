@@ -1,9 +1,9 @@
+import { DataSource } from 'typeorm';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as bodyparser from 'body-parser';
 import { NODE_ENV, PORT } from './config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { DataSource } from 'typeorm';
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 import 'dotenv/config';
