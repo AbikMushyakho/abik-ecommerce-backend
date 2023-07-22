@@ -1,7 +1,8 @@
-import { User } from 'src/user/entities/user.entity';
+import { User } from '../../user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
+  Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -13,6 +14,7 @@ export enum OTPType {
   other = 'OTHER',
 }
 
+@Entity('otp')
 export class OTP {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -32,7 +34,6 @@ export class OTP {
 
   @Column('uuid')
   user_id: string;
-
   @ManyToOne(
     () => User,
     (user) => user.otps,

@@ -3,10 +3,10 @@ import { AppModule } from './app.module';
 import * as bodyparser from 'body-parser';
 import { NODE_ENV, PORT } from './config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppDataSource } from './data-source';
 import { DataSource } from 'typeorm';
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
+import 'dotenv/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -49,13 +49,13 @@ async function bootstrap() {
   );
   app.use(helmet());
 
-  AppDataSource.initialize()
-    .then(() => {
-      console.log('Data Source has been initialized!');
-    })
-    .catch((err) => {
-      console.error('Error during Data Source initialization', err);
-    });
+  // AppDataSource.initialize()
+  //   .then(() => {
+  //     console.log('Data Source has been initialized!');
+  //   })
+  //   .catch((err) => {
+  //     console.error('Error during Data Source initialization', err);
+  //   });
 
   process.on('SIGTERM', () => {
     console.info('SIGTERM signal received.');

@@ -1,17 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateOtpDto } from './dto/create-otp.dto';
+
 import { UpdateOtpDto } from './dto/update-otp.dto';
-import { OTP, OTPType } from './entities/otp.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { generateOTP } from 'src/helpers/utils';
 
 @Injectable()
 export class OtpService {
-  constructor(
-    @InjectRepository(OTP)
-    private readonly dataSource: DataSource,
-  ) {}
+  constructor() {}
 
   // async createOtp(userId: string, type: OTPType) {
   //   const code = await generateOTP(6);

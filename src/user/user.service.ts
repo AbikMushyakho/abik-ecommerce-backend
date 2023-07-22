@@ -9,7 +9,6 @@ import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 // import { InjectRepository } from '@nestjs/typeorm';
 import * as argon from 'argon2';
-import { OtpService } from 'src/otp/otp.service';
 import { OTP, OTPType } from 'src/otp/entities/otp.entity';
 import { MailType, getMailTemplates } from 'src/helpers/templates-generator';
 import { sendMail } from 'src/helpers/mail';
@@ -19,8 +18,7 @@ import { generateOTP } from 'src/helpers/utils';
 export class UserService {
   constructor(
     // @InjectRepository(User) private userRepository:Repository<User>,
-    private readonly dataSource: DataSource,
-    private otpService: OtpService,
+    private readonly dataSource: DataSource, // private otpService: OtpService,
   ) {}
 
   async register(payload: CreateUserDto) {

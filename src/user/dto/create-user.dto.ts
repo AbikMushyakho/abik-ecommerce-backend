@@ -18,7 +18,7 @@ export class CreateUserDto {
 
   @ApiProperty({ example: 'John Kawan' })
   @IsString()
-  readonly fullName: string;
+  readonly full_name: string;
 
   @ApiProperty({ example: 'Los Angle' })
   @IsString()
